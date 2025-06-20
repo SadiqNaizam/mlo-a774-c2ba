@@ -9,7 +9,8 @@ import Footer from '@/components/layout/Footer';
 import AuthFormWrapper from '@/components/AuthFormWrapper';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label'; // Though shadcn FormItem implies Label, explicit import is fine
+// import { Label } from '@/components/ui/label'; // Though shadcn FormItem implies Label, explicit import is fine (Not directly used now)
+import { Checkbox } from '@/components/ui/checkbox'; // Added import for Checkbox
 import {
   Form,
   FormControl,
@@ -30,6 +31,9 @@ const registrationFormSchema = z.object({
     .regex(/[0-9]/, { message: "Password must contain at least one number." })
     .regex(/[^a-zA-Z0-9]/, { message: "Password must contain at least one special character." }),
   confirmPassword: z.string().min(8, { message: "Please confirm your password." }),
+  termsAccepted: z.boolean().refine(val => val === true, {
+    message: "You must accept the Terms of Service and Privacy Policy to create an account.",
+  }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match.",
   path: ["confirmPassword"], // Path of error
@@ -51,6 +55,7 @@ const RegistrationPage: React.FC = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      termsAccepted: false, // Added default value for termsAccepted
     },
   });
 
@@ -163,6 +168,37 @@ const RegistrationPage: React.FC = () => {
                         </Button>
                       </div>
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="termsAccepted"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex items-center space-x-2">
+                      <FormControl>
+                        <Checkbox
+                          id="termsAccepted"
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel
+                        htmlFor="termsAccepted"
+                        className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        I agree to the{' '}
+                        <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                          Terms of Service
+                        </a>{' '}
+                        and{' '}
+                        <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">
+                          Privacy Policy
+                        </a>.
+                      </FormLabel>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
